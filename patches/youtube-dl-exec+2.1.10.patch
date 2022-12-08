@@ -1,0 +1,13 @@
+diff --git a/node_modules/youtube-dl-exec/src/index.d.ts b/node_modules/youtube-dl-exec/src/index.d.ts
+index 18af516..948ad3c 100644
+--- a/node_modules/youtube-dl-exec/src/index.d.ts
++++ b/node_modules/youtube-dl-exec/src/index.d.ts
+@@ -100,6 +100,8 @@ declare module 'youtube-dl-exec' {
+         abortOnError?: boolean,
+         dumpUserAgent?: boolean,
+         listExtractors?: boolean,
++        downloadSections?: string[],
++        forceKeyframesAtCuts?: boolean,
+         extractorDescriptions?: boolean,
+         forceGenericExtractor?: boolean,
+         defaultSearch?: string,
