@@ -48,9 +48,9 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-USER nextjs
-
 RUN apk add --no-cache ffmpeg
+RUN chown -R nextjs /app
+USER nextjs
 
 EXPOSE 3000
 
