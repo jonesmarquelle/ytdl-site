@@ -4,6 +4,8 @@ import { FileType } from "../../../pages";
 
 import { router, publicProcedure } from "../trpc";
 
+import { randomBytes } from "crypto";
+
 export const videoRouter = router({
   getVideo: publicProcedure
     .input(z.object({
@@ -18,12 +20,15 @@ export const videoRouter = router({
       const videoFile = input.fileType == FileType.mp4;
       const audioFile = input.fileType == FileType.mp3;
 
+      const randID = randomBytes(8).toString('hex');
       const flags: Record<string, unknown> = {
         maxFilesize: "50M",
         downloadSections: [`*${input.startTime}-${input.endTime}`],
         forceKeyframesAtCuts: true,
-        output: "download.mp4",
-     //   dumpJson: true,
+        print: `after_move:${randID}_%(id)s.%(ext)s`,
+        output: `${randID}_%(id)s.%(ext)s`,
+        simulate:false,
+        quiet:true,
       }
 
       if (audioFile) {
@@ -35,7 +40,7 @@ export const videoRouter = router({
 
       const res = await youtubeDl(input.url, flags);
       return {
-        res 
+        res: `${res}`
       };
     }),
 });

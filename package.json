@@ -7,7 +7,7 @@
     "dev": "next dev",
     "lint": "next lint",
     "start": "next start",
-	"postinstall": "patch-package"
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@tanstack/react-query": "^4.16.0",

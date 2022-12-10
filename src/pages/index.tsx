@@ -1,6 +1,5 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import CloseIcon from "../components/CloseIcon";
 import DownloadIcon from "../components/DownloadIcon";
@@ -12,23 +11,17 @@ export enum FileType {
   mp4 = "mp4",
 }
 
-interface DLRequest {
-  url: string,
-  fileType?: FileType,
-  startTime?: string,
-  endTime?: string
-}
-
 const Home: NextPage = () => {
   const [ loaded, setLoaded ] = useState(false);
   const [ showVideo, setShowVideo ] = useState(false);
   const [ showDownload, setShowDownload ] = useState(false);
   const [ url, setUrl ] = useState<string>();
-  const [ valid, setValid ] = useState<boolean>(true);
+  const [ validURL, setValidURL ] = useState<boolean>(true);
 
   const [ startTime, setStartTime ] = useState<string>();
   const [ endTime, setEndTime ] = useState<string>();
 
+  const [ video, setVideo ] = useState<string|null>(null);
   const [ embedTimeStampURL, setEmbedTimeStampURL ] = useState<string>();
 
   const timeInSecs = (timeString?: string) => {
@@ -45,41 +38,35 @@ const Home: NextPage = () => {
     setEmbedTimeStampURL(timestampUrl(embedUrl(url)))
   }, [startTime, endTime, url])
 
-  const [ req, setReq ] = useState<DLRequest>();
-  const video = trpc.video.getVideo.useQuery(req);
+  const utils = trpc.useContext();
   const [ videoDownloaded, setVideoDownloaded ] = useState<boolean>();
-  const [ fileType, setFileType ] = useState<FileType>();
-  const [ filePath, setFilePath ] = useState<string>(`./download.${fileType}`);
+  const [ fileType, setFileType ] = useState<FileType|undefined>();
 
   useEffect(() => {
-    setFilePath(`download.${fileType}`)
-  }, [fileType, videoDownloaded])
-
-  useEffect(() => {
-    if (video.data?.res) {
+    if (video) {
       setVideoDownloaded(true);
     } else {
       setVideoDownloaded(false);
     }
-  }, [video.data]);
+  }, [fileType, video]);
 
   const handleCloseClick = () => {
     setUrl(undefined);
-    setReq(undefined);
-    setValid(true);
+    setValidURL(true);
     setLoaded(false);
     setVideoDownloaded(false);
     setShowDownload(false);
     setShowVideo(false);
+    setFileType(undefined)
   }
 
   const handleSubmitURL = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!url) {
-      setValid(false);
+      setValidURL(false);
       return;
     }
-    setValid(true);
+    setValidURL(true);
     setLoaded(true);
   }
 
@@ -87,10 +74,30 @@ const Home: NextPage = () => {
     setUrl(e.currentTarget.value);
   }
 
-  const handleConfirmDownload = (type: FileType) => {
+  const handleConfirmDownload = async (type: FileType) => {
     if (!url) return;
     setFileType(type);
-    setReq({url, fileType: type, startTime, endTime});//startTime, endTime});
+   // setReq({url, fileType: type, startTime, endTime});
+    const video = await utils.client.video.getVideo.query({url, fileType: type, startTime, endTime});
+    setVideo(video.res);
+  }
+
+  const downloadFile = () => {
+    if (!video || !fileType) return;
+    const getPath = video;
+    const getType = fileType;
+    handleCloseClick()
+
+    fetch(`./api/download?filename=${getPath}&filetype=${getType}`)
+    .then((res) => res.blob())
+    .then((blob) => {
+      const localURL = URL.createObjectURL(blob);
+      handleCloseClick();
+      const anchor = document.createElement('a');
+      anchor.setAttribute('href', localURL);
+      anchor.setAttribute('download', getPath);
+      anchor.click();
+    });
   }
 
   return (
@@ -104,7 +111,7 @@ const Home: NextPage = () => {
         <div className="container flex flex-col items-center justify-center gap-8 px-4 py-16">
           <p className="text-4xl md:text-5xl transition-all text-slate-400 font-thin tracking-tighter"><strong>YouTube</strong> Downloader</p>
             <form onSubmit={handleSubmitURL} className="w-full max-w-2xl container flex flex-col items-center gap-4">
-              <div onTransitionEnd={() => setShowVideo(true)} className={`${!valid && 'border-pink-500'} ${loaded ? (showDownload ? "aspect-video" : "h-[56vh]") : "h-12"}  rounded-3xl transition-all duration-500 w-full bg-none text-neutral-400 p-2 border-2 group-invalid:border-pink-500`}>
+              <div onTransitionEnd={() => setShowVideo(true)} className={`${!validURL && 'border-pink-500'} ${loaded ? (showDownload ? "aspect-video" : "h-[56vh]") : "h-12"}  rounded-3xl transition-all duration-500 w-full bg-none text-neutral-400 p-2 border-2 group-invalid:border-pink-500`}>
                 {loaded ? (
                   <div className="relative h-full w-full flex flex-col gap-2">
                       { showVideo && url ? ( 
@@ -120,8 +127,8 @@ const Home: NextPage = () => {
                     </button>
 
                     { showVideo ? (
-                    <div className={`${showDownload ? "hidden" : "visible"} flex my-auto justify-center px-4 text-md`}>
-                      <div onTransitionEnd={() => setShowDownload(!!videoDownloaded)} className={`${video.data?.res ? "opacity-0" : "opacity-100"} flex w-full flex-row gap-2 items-center transition-all duration-500`}>
+                    <div className={`${showDownload ? "-my-2 h-0" : "my-0"} flex justify-center px-4 text-md transition-all duration-300`}>
+                      <div onTransitionEnd={() => setShowDownload(!!videoDownloaded)} className={`${video ? "translate-x-6 opacity-0" : "opacity-100"} flex w-full flex-row gap-2 items-center transition-all duration-500`}>
                         <label htmlFor="startTime" className="text-sm">Start</label>
                         <TimeInput onChangeTime={(time) => setStartTime(time)} fieldCount={3} className="w-24 border-2 p-2 rounded-full outline-neutral-400" />
                         <label htmlFor="endTime" className="text-sm">End</label>
@@ -149,18 +156,13 @@ const Home: NextPage = () => {
               <button type="submit" className={`${showDownload && 'hidden'} ${loaded ? `h-0 invisible` : `h-14`} aspect-square p-1 fill-slate-400 hover:fill-slate-500 rounded-full hover:ring-4 ring-slate-400 transition-all duration-300`}>
                 <DownloadIcon height={"100%"} width={"100%"} className="rounded-full" />
               </button>
-              <button>
-                <a href={`./api/download?filename=${filePath}&filetype=${fileType}`} download={filePath} 
-                className={`${showDownload ? "w-36 visible opacity-100" : "h-0 invisible opacity-0"} h-14 bg-red-1000 text-white rounded-full py-2 px-8 transition-all duration-500`}>
+              <button
+                onClick={downloadFile}
+                className={`${showDownload ? 'opacity-100 visible' : 'opacity-0 hidden'} h-14 bg-slate-400 hover:bg-slate-500 hover:rounded-md text-white text-l tracking-widest hover:text-2xl rounded-3xl py-2 px-8 transition-all duration-300`}>
                   DOWNLOAD
-                </a>
               </button>
             </form>
-            {/*
-          <p className="text-2xl text-white">
-            {hello.data ? hello.data.greeting : "Loading tRPC query..."}
-          </p>
-*/}
+
         </div>
       </main>
     </>
