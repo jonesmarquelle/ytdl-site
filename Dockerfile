@@ -4,6 +4,8 @@ FROM nikolaik/python-nodejs:python3.8-nodejs18-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
+RUN apt-get install ffmpeg
+
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 RUN \
