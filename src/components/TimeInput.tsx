@@ -48,7 +48,7 @@ const TimeInput: React.FC<TimeInputProps> = (props) => {
                     defaultValue="00"
                     maxLength={2}
                     onFocus={e => e.currentTarget.select()}
-                    className={`text-center w-1/3 outline-none selection:text-white selection:bg-slate-400`}
+                    className={`text-center w-1/3 outline-none bg-transparent selection:text-white selection:bg-slate-400`}
                 />
             )}
             </div>

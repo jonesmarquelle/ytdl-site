@@ -57,7 +57,9 @@ const Home: NextPage = () => {
     setVideoDownloaded(false);
     setShowDownload(false);
     setShowVideo(false);
-    setFileType(undefined)
+    setVideo(null);
+    setFileType(undefined);
+    setEmbedTimeStampURL(undefined);
   }
 
   const handleSubmitURL = (e: React.FormEvent<HTMLFormElement>) => {
@@ -77,7 +79,6 @@ const Home: NextPage = () => {
   const handleConfirmDownload = async (type: FileType) => {
     if (!url) return;
     setFileType(type);
-   // setReq({url, fileType: type, startTime, endTime});
     const video = await utils.client.video.getVideo.query({url, fileType: type, startTime, endTime});
     setVideo(video.res);
   }
@@ -111,29 +112,31 @@ const Home: NextPage = () => {
         <div className="container flex flex-col items-center justify-center gap-8 px-4 py-16">
           <p className="text-4xl md:text-5xl transition-all text-slate-400 font-thin tracking-tighter"><strong>YouTube</strong> Downloader</p>
             <form onSubmit={handleSubmitURL} className="w-full max-w-2xl container flex flex-col items-center gap-4">
-              <div onTransitionEnd={() => setShowVideo(true)} className={`${!validURL && 'border-pink-500'} ${loaded ? (showDownload ? "aspect-video" : "h-[56vh]") : "h-12"}  rounded-3xl transition-all duration-500 w-full bg-none text-neutral-400 p-2 border-2 group-invalid:border-pink-500`}>
+              <div onTransitionEnd={() => setShowVideo(true)} className={`${!validURL && 'border-pink-500'} ${loaded ? (showDownload ? "aspect-video" : "h-[41vh] sm:h-[56vh]") : "h-12"}  rounded-3xl transition-all duration-500 w-full bg-transparent text-neutral-400 p-2 border-2 group-invalid:border-pink-500`}>
                 {loaded ? (
                   <div className="relative h-full w-full flex flex-col gap-2">
                       { showVideo && url ? ( 
-                        <div className="rounded-2xl overflow-clip">
+                        <div className="rounded-2xl overflow-clip border-2">
                         <iframe className="object-cover w-[101%] -mt-3 aspect-video" src={embedTimeStampURL} title="YouTube video player" frameBorder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                         </div>
                       ) : (
                         <div className="bg-neutral-200 w-full h-full rounded-2xl aspect-video animate-pulse"/>
                       )}
                     
-                    <button onClick={handleCloseClick} className="absolute group h-11 p-2 aspect-square -right-5 -top-5 rounded-full bg-neutral-200 border-8 border-white hover:bg-slate-400 hover:ring-slate-400 hover:ring-2 hover:border-[6px] transition-all" >
+                    <button onClick={handleCloseClick} className="absolute group h-8 p-2 hover:p-1 aspect-square -right-5 -top-5 rounded-full bg-white border-2 hover:bg-slate-400 hover:ring-slate-400 hover:ring-2 hover:border-[6px] transition-all" >
                       <CloseIcon className="w-full h-full fill-neutral-400 group-hover:fill-white"/>
                     </button>
 
                     { showVideo ? (
-                    <div className={`${showDownload ? "-my-2 h-0" : "my-0"} flex justify-center px-4 text-md transition-all duration-300`}>
-                      <div onTransitionEnd={() => setShowDownload(!!videoDownloaded)} className={`${video ? "translate-x-6 opacity-0" : "opacity-100"} flex w-full flex-row gap-2 items-center transition-all duration-500`}>
-                        <label htmlFor="startTime" className="text-sm">Start</label>
-                        <TimeInput onChangeTime={(time) => setStartTime(time)} fieldCount={3} className="w-24 border-2 p-2 rounded-full outline-neutral-400" />
-                        <label htmlFor="endTime" className="text-sm">End</label>
-                        <TimeInput onChangeTime={(time) => setEndTime(time)} fieldCount={3} className="w-24 border-2 p-2 rounded-full outline-neutral-400" />
-                        <div className={`ml-auto flex flex-row gap-2 rounded-full border-2 border-neutral-400`}>
+                    <div className={`${showDownload ? "-my-2 h-0" : "my-0 h-auto"} flex justify-center px-4 text-md transition-all duration-300`}>
+                      <div onTransitionEnd={() => setShowDownload(!!videoDownloaded)} className={`${video ? "translate-x-6 opacity-0" : "opacity-100"} flex w-full flex-col sm:flex-row gap-2 items-center transition-all duration-500`}>
+                        <div className={`flex flex-row gap-2 items-center`}>
+                          <label htmlFor="startTime" className="text-sm">Start</label>
+                          <TimeInput onChangeTime={(time) => setStartTime(time)} fieldCount={3} className="w-24 border-2 p-2 rounded-full outline-neutral-400" />
+                          <label htmlFor="endTime" className="text-sm">End</label>
+                          <TimeInput onChangeTime={(time) => setEndTime(time)} fieldCount={3} className="w-24 border-2 p-2 rounded-full outline-neutral-400" />
+                        </div>
+                        <div className={`sm:ml-auto flex flex-row gap-2 rounded-full border-2 border-neutral-400`}>
                           <button onClick={() => handleConfirmDownload(FileType.mp3)} 
                           className={`border-2 rounded-full text-sm px-3 py-1 text-white bg-slate-400 hover:bg-slate-500 transition-all`}>
                             MP3
@@ -150,7 +153,7 @@ const Home: NextPage = () => {
                     )}
                   </div>
                 ) : (
-                  <input onChange={handleURLInputChange} type="url" placeholder="Enter YouTube video URL..." className="bg-none w-full h-full outline-none text-xl lg:text-2xl text-center placeholder:text-slate-200 focus:text-slate-500"></input>
+                  <input onChange={handleURLInputChange} type="url" placeholder="Enter YouTube video URL..." className="bg-transparent w-full h-full outline-none text-xl lg:text-2xl text-center placeholder:text-slate-200 focus:text-slate-500"></input>
                 )}
               </div>
               <button type="submit" className={`${showDownload && 'hidden'} ${loaded ? `h-0 invisible` : `h-14`} aspect-square p-1 fill-slate-400 hover:fill-slate-500 rounded-full hover:ring-4 ring-slate-400 transition-all duration-300`}>
