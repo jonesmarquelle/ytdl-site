@@ -78,7 +78,7 @@ const Home: NextPage = () => {
   }
 
   const handleURLInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setUrl(e.currentTarget.value);
+    setUrl(e.currentTarget.value.replace('youtu.be/', 'www.youtube.com/watch?v='));
   }
 
   const handleConfirmDownload = async (type: FileType) => {
