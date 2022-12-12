@@ -118,32 +118,30 @@ const Home: NextPage = () => {
         <div className="container flex flex-col items-center justify-center gap-8 px-4 py-16">
           <p className="text-4xl md:text-5xl transition-all text-slate-400 font-thin tracking-tighter"><strong>YouTube</strong> Downloader</p>
           <form onSubmit={handleSubmitURL} className="w-full max-w-2xl container flex flex-col items-center gap-4">
-            <div onTransitionEnd={() => setShowVideo(true)} className={`${!validURL && 'border-pink-500'} ${loaded ? (showDownload ? "aspect-video" : "h-[52vh] sm:h-[56vh]") : "h-12"}  rounded-3xl transition-all duration-500 w-full bg-transparent text-neutral-400 p-2 border-2 group-invalid:border-pink-500`}>
+            <div onTransitionEnd={() => setShowVideo(true)} className={`${!validURL && 'border-pink-500'} ${loaded ? (showDownload ? "aspect-video" : "h-[58vh] sm:h-[56vh] md:h-[60vh]") : "h-12"} relative rounded-3xl transition-all duration-500 w-full bg-transparent text-neutral-400 p-2 border-2 group-invalid:border-pink-500`}>
               {loaded ? (
-                <div className="relative h-full w-full flex flex-col gap-2">
+                <div className="w-[95%] sm:w-full flex flex-col gap-2">
                   {showVideo && url ? (
-                    <div className="rounded-2xl overflow-clip border-2">
-                      <iframe className="object-cover w-[101%] -mt-3 aspect-video" src={embedTimeStampURL} title="YouTube video player" frameBorder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
-                    </div>
+                      <iframe className=" rounded-2xl border-2 aspect-video" src={embedTimeStampURL} title="YouTube video player" frameBorder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                   ) : (
                     <div className="bg-neutral-200 w-full h-full rounded-2xl aspect-video animate-pulse" />
                   )}
 
-                  <button onClick={handleCloseClick} className="absolute group h-8 p-2 hover:p-1 aspect-square -right-5 -top-5 rounded-full bg-white border-2 hover:bg-slate-400 hover:ring-slate-400 hover:ring-2 hover:border-[6px] transition-all">
+                  <button onClick={handleCloseClick} className="absolute group h-8 p-2 hover:p-1 aspect-square -right-2 -top-2 rounded-full bg-white border-2 hover:bg-slate-400 hover:ring-slate-400 hover:ring-2 hover:border-[6px] transition-all">
                     <CloseIcon className="w-full h-full fill-neutral-400 group-hover:fill-white" />
                   </button>
 
                   {showVideo ? (
-                    <div className={`${showDownload ? "-my-2 h-0" : "my-0 sm:h-10"} flex justify-center px-4 text-md transition-all duration-300`}>
+                    <div className={`${showDownload ? "-my-2 h-0" : ""} flex justify-center px-4 text-md transition-all duration-300`}>
                       <div onTransitionEnd={() => setShowDownload(!!videoDownloaded)} className={`${video ? "translate-x-6 opacity-0" : "opacity-100"} flex w-full flex-col sm:flex-row gap-2 items-center transition-all duration-500`}>
                         <div className={`flex flex-row gap-2`}>
                           <div className="flex flex-col sm:flex-row gap-1 items-center">
                             <label htmlFor="startTime" className="text-sm">Start</label>
-                            <TimeInput onChangeTime={(time) => setStartTime(time)} fieldCount={3} className="w-24 border-2 p-2 rounded-full outline-neutral-400" />
+                            <TimeInput onChangeTime={(time) => setStartTime(time)} fieldCount={3} className="w-24 border-2 sm:p-2 rounded-full outline-neutral-400" />
                           </div>
                           <div className="flex flex-col sm:flex-row gap-1 items-center">
                             <label htmlFor="endTime" className="text-sm">End</label>
-                            <TimeInput onChangeTime={(time) => setEndTime(time)} fieldCount={3} className="w-24 border-2 p-2 rounded-full outline-neutral-400" />
+                            <TimeInput onChangeTime={(time) => setEndTime(time)} fieldCount={3} className="w-24 border-2 sm:p-2 rounded-full outline-neutral-400" />
                           </div>
                         </div>
                         <div className={`${videoLoading ? 'border-0 w-10' : 'border-2 w-[12.5rem]'} sm:ml-auto flex rounded-full border-neutral-400 items-center transition-all duration-300`}>
